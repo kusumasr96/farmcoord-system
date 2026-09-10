@@ -374,7 +374,7 @@ export const demoRequests: ResourceRequest[] = [
       explanation:
         "This request received very high priority because the onion crop is actively wilting and will suffer significant loss without immediate irrigation. The deadline is critical.",
     }),
-    status: "scheduled",
+    status: "pending",
     createdAt: "2026-09-09T07:30:00Z",
     offline: false,
   },
@@ -507,7 +507,17 @@ export const demoRequests: ResourceRequest[] = [
       explanation:
         "This request has high priority because the harvested soybean needs immediate transport to avoid price loss and quality degradation.",
     }),
-    status: "scheduled",
+    schedule: {
+      resourceId: "V01",
+      farmerId: "F06",
+      start: "2026-09-10T09:00:00",
+      end: "2026-09-10T17:00:00",
+      duration: 480,
+      travelTime: 70,
+      bufferTime: 30,
+      status: "confirmed",
+    },
+    status: "completed",
     createdAt: "2026-09-09T08:00:00Z",
     offline: false,
   },
