@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "start": "bunx serve dist -s -p $PORT",
     "lint": "eslint .",
     "format": "prettier --write .",
     "preview": "vite preview"
