@@ -127,7 +127,22 @@ export default function NewRequest() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.farmerId || !form.farmerName || !form.city || form.landArea <= 0 || !form.resourceType || !form.earliestStart || !form.latestEnd) return;
+    if (!form.farmerId) {
+      alert("Please select a farmer before submitting.");
+      return;
+    }
+    if (!form.farmerName || !form.city || form.landArea <= 0) {
+      alert("Please fill in all required farmer information fields (Name, City, Land Area).");
+      return;
+    }
+    if (!form.resourceType) {
+      alert("Please select a resource type.");
+      return;
+    }
+    if (!form.earliestStart || !form.latestEnd) {
+      alert("Please select both Earliest Start and Latest End dates.");
+      return;
+    }
 
     // Handle offline mode
     if (state.offlineMode) {
@@ -795,7 +810,7 @@ export default function NewRequest() {
           type="submit"
           size="lg"
           className="w-full sm:w-auto"
-          disabled={!form.farmerId || !form.farmerName || !form.city || form.landArea <= 0 || !form.resourceType || !form.earliestStart || !form.latestEnd}
+          disabled={!form.farmerName || !form.city || form.landArea <= 0 || !form.resourceType || !form.earliestStart || !form.latestEnd}
         >
           <Send className="h-4 w-4 mr-2" />
           Submit Request
