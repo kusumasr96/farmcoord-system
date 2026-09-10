@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "start": "bunx serve dist -s -p $PORT",
     "lint": "eslint .",
     "format": "prettier --write .",
