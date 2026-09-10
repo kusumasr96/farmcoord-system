@@ -24,7 +24,13 @@ export default function Schedule() {
   const scheduled = state.requests.filter((r) => r.schedule);
   const conflicted = state.requests.filter((r) => r.conflict);
   const highPriority = state.requests.filter((r) => r.priority.total >= 70);
-  const availableResources = state.resources.filter((r) => r.available && r.maintenanceStatus === "Operational");
+  // Available = Total resources minus unique resources that have a confirmed schedule
+  const occupiedResourceIds = new Set(
+    scheduled.map((r) => r.schedule!.resourceId)
+  );
+  const availableResources = state.resources.filter(
+    (r) => r.available && r.maintenanceStatus === "Operational" && !occupiedResourceIds.has(r.id)
+  );
 
   // Group schedule by date
   const byDate: Record<string, typeof scheduled> = {};

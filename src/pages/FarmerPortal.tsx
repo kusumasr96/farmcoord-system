@@ -297,25 +297,79 @@ export default function FarmerPortal() {
         <TabsContent value="profile">
           <Card className="border-border/60">
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-4">Resource Requests Summary</h3>
+              <h3 className="font-semibold mb-4">My Resource Requests</h3>
               {requests.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No resource requests yet.</p>
+                <div className="text-center py-6">
+                  <p className="text-muted-foreground text-sm mb-3">No resource requests yet.</p>
+                  <Link to={`/requests/new?farmerId=${farmer.id}`}>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Create Your First Request
+                    </Button>
+                  </Link>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {requests.map((req) => (
-                    <div key={req.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">{req.resourceType}</p>
-                        <p className="text-xs text-muted-foreground">{req.city} • {req.crop}</p>
+                    <div key={req.id} className="p-4 border border-border/60 rounded-lg">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-sm">{req.id}</span>
+                            <Badge variant={req.status === "scheduled" ? "default" : req.status === "conflict_detected" ? "destructive" : "secondary"} className="text-[10px]">
+                              {req.status.replace(/_/g, " ")}
+                            </Badge>
+                            {req.priority.total >= 70 && (
+                              <Badge variant="destructive" className="text-[10px]">High</Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{req.resourceType} • {req.city} • {req.crop}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary font-bold text-xs">
+                            {req.priority.total}<span className="text-[9px] font-normal">/100</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <Badge variant={req.status === "scheduled" ? "default" : req.status === "conflict_detected" ? "destructive" : "secondary"}>
-                          {req.status.replace(/_/g, " ")}
-                        </Badge>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Priority: {req.priority.total}/100
-                        </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted-foreground">
+                        <div>
+                          <span className="text-foreground font-medium">Crop:</span> {req.crop}
+                        </div>
+                        <div>
+                          <span className="text-foreground font-medium">Stage:</span> {req.cropStage}
+                        </div>
+                        <div>
+                          <span className="text-foreground font-medium">Duration:</span> {req.duration}min
+                        </div>
+                        <div>
+                          <span className="text-foreground font-medium">Urgency:</span> {req.urgency}
+                        </div>
+                        <div>
+                          <span className="text-foreground font-medium">Attachment:</span> {req.attachmentNeeded}
+                        </div>
+                        <div>
+                          <span className="text-foreground font-medium">Operator:</span> {req.operatorRequirement}
+                        </div>
+                        {req.conflict && (
+                          <div className="col-span-2">
+                            <span className="text-red-600 font-medium">⚠️ Conflict:</span>{" "}
+                            <span className="text-red-700">{req.conflict.resolution}</span>
+                          </div>
+                        )}
                       </div>
+                      {req.schedule && (
+                        <div className="mt-2 p-2 bg-primary/5 border border-primary/10 rounded text-xs">
+                          <p className="font-medium text-foreground">📅 Scheduled</p>
+                          <p className="text-muted-foreground">
+                            Resource: {req.schedule.resourceId} • Date: {new Date(req.schedule.start).toLocaleDateString()} • Time: {" "}
+                            {new Date(req.schedule.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {" "}
+                            {new Date(req.schedule.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                          {req.schedule.travelTime > 0 && (
+                            <p className="text-muted-foreground">Travel: {req.schedule.travelTime}min • Buffer: {req.schedule.bufferTime}min</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

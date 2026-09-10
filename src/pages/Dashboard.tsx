@@ -24,8 +24,15 @@ export default function Dashboard() {
   const pending = state.requests.filter((r) => r.status === "pending" || r.status === "priority_calculated");
   const conflicted = state.requests.filter((r) => r.status === "conflict_detected");
   const highPriority = state.requests.filter((r) => r.priority.total >= 70);
-  const availableResources = state.resources.filter((r) => r.available && r.maintenanceStatus === "Operational");
   const weatherNotifs = state.notifications.filter((n) => n.type === "weather_alert" && !n.read);
+  // Available = Total resources minus unique resources that have a confirmed schedule
+  const scheduledWithSlot = state.requests.filter((r) => r.schedule);
+  const occupiedResourceIds = new Set(
+    scheduledWithSlot.map((r) => r.schedule!.resourceId)
+  );
+  const availableResources = state.resources.filter(
+    (r) => r.available && r.maintenanceStatus === "Operational" && !occupiedResourceIds.has(r.id)
+  );
 
   return (
     <div>

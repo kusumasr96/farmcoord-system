@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { useApp, findFeasibleSlot } from "@/context/AppContext";
+import { useApp, findFeasibleSlot, haversineKm } from "@/context/AppContext";
 import type { ResourceType, ResourceCategory, PriorityBreakdown } from "@/types/farmgrid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,9 @@ export default function NewRequest() {
     resourceId?: string;
     suggestedTime?: string;
     alternativeReason?: string;
+    distance?: number;
+    travelTime?: number;
+    alternatives?: { id: string; name: string; location: string; distance: number; travelTime: number }[];
   } | null>(null);
 
   function handleSelectFarmer(farmerId: string) {
@@ -228,16 +231,33 @@ export default function NewRequest() {
     let alternativeReason = "";
     let suggestedTime = "";
     let resourceId = "";
+    let distance = 0;
+    let travelTime = 0;
 
     if (sched) {
       const res = state.resources.find((r) => r.id === sched.resourceId);
       resourceId = sched.resourceId;
       suggestedTime = `${new Date(sched.start).toLocaleString()} – ${new Date(sched.end).toLocaleString()}`;
+      distance = haversineKm(form.lat, form.lng, res?.lat ?? form.lat, res?.lng ?? form.lng);
+      travelTime = sched.travelTime;
       if (sched.status === "tentative") {
         alternativeReason = "The originally requested resource/time was unavailable, so the system found the nearest feasible alternative.";
       }
       scheduleInfo = `${res?.name ?? sched.resourceId} (${sched.duration}min, Travel: ${sched.travelTime}min, Buffer: ${sched.bufferTime}min)`;
     }
+
+    // Calculate smart alternative resources (closer ones that are compatible)
+    const compatibleResources = state.resources.filter(
+      (r) => r.type === form.resourceType && r.maintenanceStatus === "Operational" && r.available
+    );
+    const alternatives = compatibleResources
+      .map((r) => {
+        const d = haversineKm(form.lat, form.lng, r.lat, r.lng);
+        return { id: r.id, name: r.name, location: r.operationalLocation, distance: Math.round(d), travelTime: Math.round(d * 2) };
+      })
+      .filter((a) => a.distance < 300) // within 300km
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 4);
 
     setResult({
       priority: req.priority,
@@ -248,6 +268,9 @@ export default function NewRequest() {
       resourceId,
       suggestedTime,
       alternativeReason,
+      distance: Math.round(distance),
+      travelTime,
+      alternatives,
     });
     setSubmitted(true);
   }
@@ -366,7 +389,44 @@ export default function NewRequest() {
                       <span className="text-muted-foreground">Status:</span>
                       <Badge>Feasible Slot</Badge>
                     </div>
+                    {result.distance !== undefined && result.distance > 0 && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Distance:</span>
+                          <span className="font-medium">📍 {result.distance} km</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Travel Time:</span>
+                          <span className="font-medium">🕐 ~{result.travelTime} min</span>
+                        </div>
+                      </>
+                    )}
                   </div>
+                  {result.distance !== undefined && result.distance > 100 && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-xs font-medium text-amber-800">⚠️ Resource is far from your farm</p>
+                      <p className="text-xs text-amber-700 mt-1">
+                        📍 Distance: {result.distance} km • 🕐 Estimated Travel Time: ~{result.travelTime} min
+                      </p>
+                    </div>
+                  )}
+                  {result.alternatives && result.alternatives.length > 1 && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-xs font-medium text-green-800 mb-2">💡 Nearby Compatible Resources</p>
+                      <div className="space-y-1.5">
+                        {result.alternatives.map((alt) => (
+                          <div key={alt.id} className="flex items-center justify-between text-xs">
+                            <span className="text-green-700">
+                              {alt.id} – {alt.name} ({alt.location})
+                            </span>
+                            <span className="text-green-600">
+                              📍 {alt.distance}km • ~{alt.travelTime}min
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

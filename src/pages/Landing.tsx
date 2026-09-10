@@ -104,7 +104,7 @@ export default function Landing() {
                 </Button>
               </Link>
               <Link to="/resource-owner">
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 font-semibold px-8">
+                <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 font-semibold px-8" style={{ color: "white" }}>
                   Manage Resources
                 </Button>
               </Link>
@@ -226,7 +226,7 @@ export default function Landing() {
               </Button>
             </Link>
             <Link to="/dashboard">
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 font-semibold px-8">
+              <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 font-semibold px-8" style={{ color: "white" }}>
                 View Dashboard
               </Button>
             </Link>
