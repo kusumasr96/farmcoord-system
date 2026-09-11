@@ -127,14 +127,17 @@ export default function NewRequest() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.farmerId) {
-      alert("Please select a farmer before submitting.");
+    if (!form.farmerName.trim()) {
+      alert("Farmer name is required.");
       return;
     }
-    if (!form.farmerName || !form.city || form.landArea <= 0) {
-      alert("Please fill in all required farmer information fields (Name, City, Land Area).");
+    if (!form.city || form.landArea <= 0) {
+      alert("Please fill in all required farmer information fields (City, Land Area).");
       return;
     }
+
+    // Manually typed farmer names are accepted: the typed name is saved as-is.
+    // Only fall back to a generated ID when no predefined farmer was selected.
     if (!form.resourceType) {
       alert("Please select a resource type.");
       return;
@@ -143,6 +146,7 @@ export default function NewRequest() {
       alert("Please select both Earliest Start and Latest End dates.");
       return;
     }
+    const farmerId = form.farmerId || `F_NEW_${Date.now()}`;
 
     // Handle offline mode
     if (state.offlineMode) {
@@ -153,7 +157,7 @@ export default function NewRequest() {
         type: "ADD_OFFLINE_REQUEST",
         payload: {
           id: `OFF_${Date.now()}`,
-          farmerId: form.farmerId,
+          farmerId: farmerId,
           farmerName: form.farmerName,
           phone: form.phone,
           city: form.city,
@@ -193,7 +197,7 @@ export default function NewRequest() {
           message: `Your request for ${form.resourceType} has been saved locally. It will sync when connectivity is restored.`,
           timestamp: new Date().toISOString(),
           read: false,
-          farmerId: form.farmerId,
+          farmerId: farmerId,
         },
       });
       setResult({
@@ -211,7 +215,7 @@ export default function NewRequest() {
     const operator = form.operatorRequirement === "Other" ? form.operatorOther : form.operatorRequirement;
 
     const req = addRequest({
-      farmerId: form.farmerId,
+      farmerId: farmerId,
       farmerName: form.farmerName,
       phone: form.phone,
       city: form.city,
