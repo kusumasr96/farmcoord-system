@@ -36,7 +36,14 @@ export default function ResourceOwner() {
     }
   }
 
-  const totalAvailable = state.resources.filter((r) => r.available && r.maintenanceStatus === "Operational").length;
+  // Same availability calculation as Master Scheduling Dashboard:
+  // Available = Total resources minus unique resources with an active/scheduled allocation
+  const occupiedResourceIds = new Set(
+    state.requests.filter((r) => r.schedule).map((r) => r.schedule!.resourceId)
+  );
+  const totalAvailable = state.resources.filter(
+    (r) => r.available && r.maintenanceStatus === "Operational" && !occupiedResourceIds.has(r.id)
+  ).length;
   const totalMaintenance = state.resources.filter((r) => r.maintenanceStatus !== "Operational").length;
   const totalBookings = state.requests.filter((r) => r.resourceId && r.status === "scheduled").length;
 
