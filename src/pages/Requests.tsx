@@ -6,6 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import {
   ArrowLeft,
   Plus,
   AlertTriangle,
@@ -20,7 +32,7 @@ import {
 import type { ResourceRequest } from "@/types/farmgrid";
 
 export default function Requests() {
-  const { state, getResourceById } = useApp();
+  const { state, dispatch, getResourceById } = useApp();
   const [expanded, setExpanded] = useState<string | null>(null);
 
   function getFiltered(status: string) {
@@ -195,6 +207,36 @@ export default function Requests() {
                   <p>{req.conflict.resolution}</p>
                 </div>
               )}
+
+              {/* Delete Request */}
+              <div className="mt-4 flex justify-end">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      Delete Request
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure you want to delete this resource request?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete request {req.id}
+                        {req.schedule ? ` and release the allocation on resource ${req.schedule.resourceId}` : ""}.
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => dispatch({ type: "DELETE_REQUEST", payload: req.id })}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
           )}
         </CardContent>

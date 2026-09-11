@@ -248,6 +248,17 @@ function isSlotFree(
   return true;
 }
 
+// ── Resource Availability (single source of truth, used by all pages) ──
+// Unique physical resources currently occupied by an ACTIVE scheduled allocation.
+// Cancelled / completed / disrupted requests do NOT occupy their resource.
+export function getOccupiedResourceIds(requests: ResourceRequest[]): Set<string> {
+  return new Set(
+    requests
+      .filter((r) => r.schedule && r.status === "scheduled")
+      .map((r) => r.schedule!.resourceId)
+  );
+}
+
 export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -265,6 +276,7 @@ export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: numb
 type Action =
   | { type: "ADD_REQUEST"; payload: ResourceRequest }
   | { type: "UPDATE_REQUEST"; payload: ResourceRequest }
+  | { type: "DELETE_REQUEST"; payload: string }
   | { type: "UPDATE_REQUEST_STATUS"; payload: { id: string; status: RequestStatus } }
   | { type: "UPDATE_FARMER"; payload: Farmer }
   | { type: "ADD_NOTIFICATION"; payload: Notification }
@@ -288,6 +300,14 @@ function reducer(state: AppState, action: Action): AppState {
         requests: state.requests.map((r) =>
           r.id === action.payload.id ? action.payload : r
         ),
+      };
+    case "DELETE_REQUEST":
+      // Removes the request AND its allocation, so any scheduled resource is
+      // released immediately — availability recalculates reactively everywhere.
+      return {
+        ...state,
+        requests: state.requests.filter((r) => r.id !== action.payload),
+        notifications: state.notifications.filter((n) => n.requestId !== action.payload),
       };
     case "UPDATE_REQUEST_STATUS":
       return {

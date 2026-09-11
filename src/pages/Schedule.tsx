@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useApp } from "@/context/AppContext";
+import { useApp, getOccupiedResourceIds } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,10 +24,9 @@ export default function Schedule() {
   const scheduled = state.requests.filter((r) => r.schedule);
   const conflicted = state.requests.filter((r) => r.conflict);
   const highPriority = state.requests.filter((r) => r.priority.total >= 70);
-  // Available = Total resources minus unique resources that have a confirmed schedule
-  const occupiedResourceIds = new Set(
-    scheduled.map((r) => r.schedule!.resourceId)
-  );
+  // Available = Total resources minus unique resources with an ACTIVE scheduled allocation
+  // (shared calculation from AppContext — cancelled/completed do not occupy)
+  const occupiedResourceIds = getOccupiedResourceIds(state.requests);
   const availableResources = state.resources.filter(
     (r) => r.available && r.maintenanceStatus === "Operational" && !occupiedResourceIds.has(r.id)
   );
@@ -62,7 +61,7 @@ export default function Schedule() {
         {[
           { label: "Total Resources", value: state.resources.length, icon: Truck, color: "bg-primary/10 text-primary" },
           { label: "Available Resources", value: availableResources.length, icon: CheckCircle2, color: "bg-green-100 text-green-700" },
-          { label: "Scheduled Allocations", value: scheduled.length, icon: Calendar, color: "bg-blue-100 text-blue-700" },
+          { label: "Scheduled Allocations", value: state.requests.filter((r) => r.status === "scheduled").length, icon: Calendar, color: "bg-blue-100 text-blue-700" },
           { label: "Active Conflicts", value: conflicted.length, icon: AlertTriangle, color: "bg-red-100 text-red-700" },
         ].map((stat) => (
           <Card key={stat.label} className="border-border/60">

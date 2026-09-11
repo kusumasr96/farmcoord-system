@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useApp } from "@/context/AppContext";
+import { useApp, getOccupiedResourceIds } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,11 +36,9 @@ export default function ResourceOwner() {
     }
   }
 
-  // Same availability calculation as Master Scheduling Dashboard:
-  // Available = Total resources minus unique resources with an active/scheduled allocation
-  const occupiedResourceIds = new Set(
-    state.requests.filter((r) => r.schedule).map((r) => r.schedule!.resourceId)
-  );
+  // Same availability calculation as Master Scheduling Dashboard (shared helper from AppContext):
+  // Available = Total resources minus unique resources with an ACTIVE scheduled allocation
+  const occupiedResourceIds = getOccupiedResourceIds(state.requests);
   const totalAvailable = state.resources.filter(
     (r) => r.available && r.maintenanceStatus === "Operational" && !occupiedResourceIds.has(r.id)
   ).length;

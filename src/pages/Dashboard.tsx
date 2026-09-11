@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useApp } from "@/context/AppContext";
+import { useApp, getOccupiedResourceIds } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,11 +25,9 @@ export default function Dashboard() {
   const conflicted = state.requests.filter((r) => r.status === "conflict_detected");
   const highPriority = state.requests.filter((r) => r.priority.total >= 70);
   const weatherNotifs = state.notifications.filter((n) => n.type === "weather_alert" && !n.read);
-  // Available = Total resources minus unique resources that have a confirmed schedule
-  const scheduledWithSlot = state.requests.filter((r) => r.schedule);
-  const occupiedResourceIds = new Set(
-    scheduledWithSlot.map((r) => r.schedule!.resourceId)
-  );
+  // Available = Total resources minus unique resources with an ACTIVE scheduled allocation
+  // (shared calculation from AppContext — cancelled/completed do not occupy)
+  const occupiedResourceIds = getOccupiedResourceIds(state.requests);
   const availableResources = state.resources.filter(
     (r) => r.available && r.maintenanceStatus === "Operational" && !occupiedResourceIds.has(r.id)
   );
