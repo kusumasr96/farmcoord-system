@@ -11,6 +11,7 @@ import "./index.css";
 // Lazy load route components
 const Landing = lazy(() => import("./pages/Landing.tsx"));
 const FarmerPortal = lazy(() => import("./pages/FarmerPortal.tsx"));
+const MyProfile = lazy(() => import("./pages/MyProfile.tsx"));
 const NewRequest = lazy(() => import("./pages/NewRequest.tsx"));
 const Requests = lazy(() => import("./pages/Requests.tsx"));
 const ResourceOwner = lazy(() => import("./pages/ResourceOwner.tsx"));
@@ -82,6 +83,7 @@ createRoot(document.getElementById("root")!).render(
               <Route element={<Layout />}>
                 <Route path="/" element={<Landing />} />
                 <Route path="/farmer-portal" element={<FarmerPortal />} />
+                <Route path="/my-profile" element={<MyProfile />} />
                 <Route path="/requests" element={<Requests />} />
                 <Route path="/requests/new" element={<NewRequest />} />
                 <Route path="/resource-owner" element={<ResourceOwner />} />

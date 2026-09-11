@@ -144,6 +144,26 @@ export default function FarmerPortal() {
         Go Back
       </button>
 
+      {/* My Profile quick access */}
+      <div className="mb-6">
+        <Link to="/my-profile">
+          <Card className="border-primary/30 hover:shadow-md hover:border-primary/50 transition-all cursor-pointer">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <User className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">My Profile</p>
+                <p className="text-xs text-muted-foreground">
+                  View your information and all your resource requests
+                </p>
+              </div>
+              <ArrowLeft className="h-4 w-4 text-muted-foreground rotate-180 shrink-0" />
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
       {/* Farmer Profile Card */}
       <Card className="mb-6 border-border/60">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
